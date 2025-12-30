@@ -193,21 +193,13 @@ final class AudioRingBuffer {
         let numSamples = min(Int(audioPCMBuffer.frameLength) - offset, Int(outputBuffer.frameLength) - head)
         if inputFormat.isInterleaved {
             let channelCount = Int(inputFormat.channelCount)
-            let outputOffset = head * channelCount
-            let inputOffset = offset * channelCount
             switch inputFormat.commonFormat {
             case .pcmFormatInt16:
-                guard let outputPtr = outputBuffer.int16ChannelData?[0],
-                      let inputPtr = audioPCMBuffer.int16ChannelData?[0] else { return }
-                memcpy(outputPtr.advanced(by: outputOffset), inputPtr.advanced(by: inputOffset), numSamples * channelCount * 2)
+                memcpy(outputBuffer.int16ChannelData?[0].advanced(by: head * channelCount), audioPCMBuffer.int16ChannelData?[0].advanced(by: offset * channelCount), numSamples * channelCount * 2)
             case .pcmFormatInt32:
-                guard let outputPtr = outputBuffer.int32ChannelData?[0],
-                      let inputPtr = audioPCMBuffer.int32ChannelData?[0] else { return }
-                memcpy(outputPtr.advanced(by: outputOffset), inputPtr.advanced(by: inputOffset), numSamples * channelCount * 4)
+                memcpy(outputBuffer.int32ChannelData?[0].advanced(by: head * channelCount), audioPCMBuffer.int32ChannelData?[0].advanced(by: offset * channelCount), numSamples * channelCount * 4)
             case .pcmFormatFloat32:
-                guard let outputPtr = outputBuffer.floatChannelData?[0],
-                      let inputPtr = audioPCMBuffer.floatChannelData?[0] else { return }
-                memcpy(outputPtr.advanced(by: outputOffset), inputPtr.advanced(by: inputOffset), numSamples * channelCount * 4)
+                memcpy(outputBuffer.floatChannelData?[0].advanced(by: head * channelCount), audioPCMBuffer.floatChannelData?[0].advanced(by: offset * channelCount), numSamples * channelCount * 4)
             default:
                 break
             }
@@ -215,17 +207,11 @@ final class AudioRingBuffer {
             for i in 0..<Int(inputFormat.channelCount) {
                 switch inputFormat.commonFormat {
                 case .pcmFormatInt16:
-                    guard let outputPtr = outputBuffer.int16ChannelData?[i],
-                          let inputPtr = audioPCMBuffer.int16ChannelData?[i] else { continue }
-                    memcpy(outputPtr.advanced(by: head), inputPtr.advanced(by: offset), numSamples * 2)
+                    memcpy(outputBuffer.int16ChannelData?[i].advanced(by: head), audioPCMBuffer.int16ChannelData?[i].advanced(by: offset), numSamples * 2)
                 case .pcmFormatInt32:
-                    guard let outputPtr = outputBuffer.int32ChannelData?[i],
-                          let inputPtr = audioPCMBuffer.int32ChannelData?[i] else { continue }
-                    memcpy(outputPtr.advanced(by: head), inputPtr.advanced(by: offset), numSamples * 4)
+                    memcpy(outputBuffer.int32ChannelData?[i].advanced(by: head), audioPCMBuffer.int32ChannelData?[i].advanced(by: offset), numSamples * 4)
                 case .pcmFormatFloat32:
-                    guard let outputPtr = outputBuffer.floatChannelData?[i],
-                          let inputPtr = audioPCMBuffer.floatChannelData?[i] else { continue }
-                    memcpy(outputPtr.advanced(by: head), inputPtr.advanced(by: offset), numSamples * 4)
+                    memcpy(outputBuffer.floatChannelData?[i].advanced(by: head), audioPCMBuffer.floatChannelData?[i].advanced(by: offset), numSamples * 4)
                 default:
                     break
                 }
